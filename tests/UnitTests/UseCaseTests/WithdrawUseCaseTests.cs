@@ -1,6 +1,7 @@
 ﻿using Application.ATMTransactions.UseCases.Register;
 using Application.ATMTransactions.UseCases.Register.Boundaries;
 using Domain.ATMCashDispenser;
+using Domain.ATMCashDispenser.Exceptions;
 using Domain.ATMTransactions.ValueObjects;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,6 @@ namespace UnitTests.UseCaseTests
             var actual = presenter.WithdrawResponse;
 
             Assert.Equal(expectedBills, actual.BillQuantities);
-            //Assert.True(expectedBills.SequenceEqual(actual.BillQuantities));
         }
 
         [Theory]
@@ -60,6 +60,24 @@ namespace UnitTests.UseCaseTests
             var actual = presenter.WithdrawResponse;
 
             Assert.Equal(expectedBills, actual.BillQuantities);
+        }
+
+        [Theory]
+        [ClassData(typeof(NotExactlyDataSetup))]
+        public async Task Withdraw_Invalid_NotExactlyAmount(
+           decimal amount)
+        {
+            var presenter = new WithdrawPresenter();
+
+            var sut = new WithdrawTransactionUseCase(
+                presenter,
+                _fixture.ATMTransactionService);
+
+            var actualEx = await Assert.ThrowsAsync<WithdrawValueCannotBeExactlyRepresentedException>(
+                async () => await sut.ExecuteAsync(new WithdrawTransactionInput(
+                new PositiveMoney(amount))));
+
+            Assert.Contains("cannot be exactly represente", actualEx.Message, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

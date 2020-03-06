@@ -55,7 +55,7 @@ namespace Domain.ATMCashDispenser
             }
 
             if (remainingWithdrawValue != 0)
-                throw new WithdrawValueNotExactlyException(positiveCurrency.Value);
+                throw new WithdrawValueCannotBeExactlyRepresentedException(positiveCurrency.Value);
 
             return outputBillQuantities;
         }
